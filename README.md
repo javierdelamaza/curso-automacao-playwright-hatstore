@@ -1,9 +1,7 @@
 # Curso de Automação de Testes com Playwright — Hat Store
 
 Curso introdutório de automação de testes end-to-end, usando o site **Hat Store**
-(`d:\hatstore\hatstore`) como aplicação alvo. Baseado na estrutura de aulas do
-repositório [galaschi/start-aula-playwright](https://github.com/galaschi/start-aula-playwright),
-com conteúdo teórico expandido e um módulo extra sobre uso de IA no dia a dia
+(`d:\hatstore\hatstore`) como aplicação alvo. Conteúdo teórico expandido e um módulo extra sobre uso de IA no dia a dia
 da automação.
 
 ## Como usar este material
