@@ -1,0 +1,18 @@
+{
+  "name": "hatstore-playwright",
+  "version": "1.0.0",
+  "description": "Suite de testes E2E em Playwright para o Hat Store",
+  "type": "module",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "test:home": "playwright test tests/home.spec.js",
+    "test:login": "playwright test tests/login.spec.js",
+    "test:api": "playwright test tests/api",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.47.0"
+  }
+}
