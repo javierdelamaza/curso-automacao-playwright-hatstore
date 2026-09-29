@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Hat Store</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+</head>
+
+<body>
+    <header class="main-header">
+        <div class="header-content">
+            <a href="index.html" style="display:flex;align-items:center;gap:1rem;text-decoration:none;">
+                <img src="imagens/logo-hatstore.png" alt="Hat Store" class="logo-header" />
+                <div class="header-titles">
+                    <h1 class="titulo-header">Hat Store</h1>
+                    <span class="slogan-header">Seu estilo começa pela cabeça</span>
+                </div>
+            </a>
+            <nav class="header-nav">
+                <a href="index.html" class="header-link">Home</a>
+                <a href="pedidos.html" class="header-link">Meus Pedidos</a>
+                <div id="auth-links">
+                    <a href="auth.html" class="header-link">Login</a>
+                </div>
+                <button id="header-cart-btn" class="header-cart-btn" title="Abrir carrinho">
+                    <img src="imagens/carrinho-icon.png" alt="Carrinho"
+                        style="height:22px;vertical-align:middle;margin-right:6px;">
+                    <span style="font-weight:bold;">Carrinho</span>
+                </button>
+            </nav>
+        </div>
+        <div class="header-bar">
+            <span class="header-bar-item">Frete grátis em todos os produtos do site</span>
+            <span class="header-bar-item">Compra segura</span>
+            <span class="header-bar-item">Suporte 24h</span>
+        </div>
+    </header>
+    <div class="promo-banner">
+        <span class="promo-text">
+            <strong>Promoção:</strong> Ganhe 20% OFF no primeiro pedido! Use o cupom <span class="cupom">HATOFF</span>
+        </span>
+    </div>
+    <main style="display: flex; align-items: flex-start;">
+        <section style="flex: 1;">
+            <div style="margin:2rem 0 1rem 2rem;">
+                <input type="text" id="search-hat" placeholder="Buscar chapéu..."
+                    style="width:60%;padding:0.7rem;border-radius:8px;border:1px solid #bcd0ee;font-size:1rem;">
+            </div>
+            <div id="main-content" style="display: flex;">
+                <div id="hats-list" style="flex: 1;">
+                    <!-- Listagem de produtos (hats) -->
+                    <div id="hats"></div>
+                </div>
+                <aside id="filter-panel" class="filter-modern">
+                    <div class="filter-header">
+                        <span class="filter-title">Filtrar produtos</span>
+                    </div>
+                    <form id="filter-form" class="filter-form-modern">
+                        <div class="filter-group">
+                            <span class="filter-label">Categorias</span>
+                            <div class="filter-categories">
+                                <label class="filter-cat-checkbox"><input type="checkbox" name="categoria" class="filter-cat-input"
+                                        value="nacional"> Nacional</label>
+                                <label class="filter-cat-checkbox"><input type="checkbox" name="categoria" class="filter-cat-input"
+                                        value="importado"> Internacional</label>
+                                <label class="filter-cat-checkbox"><input type="checkbox" name="categoria" class="filter-cat-input"
+                                        value="crescer"> Crescer</label>
+                            </div>
+                        </div>
+                        <hr class="filter-divider">
+                        <div class="filter-group">
+                            <span class="filter-label">Faixa de Preço</span>
+                            <div class="filter-prices">
+                                <div class="filter-price-field">
+                                    <label for="preco-min" class="filter-price-label">Mínimo</label>
+                                    <input type="number" step="1" min="0" id="preco-min" class="filter-price-input"
+                                        placeholder="0" maxlength="4">
+                                </div>
+                                <div class="filter-price-field">
+                                    <label for="preco-max" class="filter-price-label">Máximo</label>
+                                    <input type="number" step="1" min="0" id="preco-max" class="filter-price-input"
+                                        placeholder="999" maxlength="4">
+                                </div>
+                            </div>
+                            <button type="submit" class="filter-apply-btn">Aplicar</button>
+                        </div>
+                    </form>
+                </aside>
+            </div>
+        </section>
+    </main>
+    <!-- Loader animado -->
+    <div id="loader" class="loader" style="display:none;">
+        <div class="spinner"></div>
+        <span>Carregando...</span>
+    </div>
+    <!-- Modal genérico -->
+    <div id="modal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+            <h2 id="modal-title"></h2>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+    <!-- Sidebar do carrinho -->
+    <div id="cart-sidebar" class="cart-sidebar">
+        <div class="cart-header">
+            <h2>Carrinho</h2>
+            <button id="close-cart" class="close-cart">&times;</button>
+        </div>
+        <div id="cart-items"></div>
+        <div id="total-amount"></div>
+        <div class="carrinho-cupom"
+            style="background:#232323;border-radius:10px;padding:1.2em;margin-bottom:1em;display:flex;flex-direction:column;align-items:flex-start;gap:0.7em;">
+            <label for="cupom" style="color:#c9a94b;font-weight:bold;margin-bottom:0.2em;">Cupom de desconto:</label>
+            <div style="display:flex;align-items:center;gap:1em;">
+                <input type="text" id="cupom" name="cupom" maxlength="20" placeholder="Digite o cupom"
+                    style="border-radius:6px;border:1px solid #c9a94b;padding:0.5em 1em;background:#181818;color:#fff;width:140px;">
+                <button type="button" id="aplicar-cupom"
+                    style="background:#c9a94b;color:#232323;border:none;border-radius:6px;padding:0.5em 1.2em;font-weight:bold;cursor:pointer;">Aplicar</button>
+            </div>
+            <span class="input-error" id="erro-cupom" style="margin-top:0.5em;"></span>
+        </div>
+        <button id="checkout-button" class="checkout-button">Finalizar compra</button>
+    </div>
+    <!-- Sidebar de pedidos -->
+    <div id="pedidos-sidebar" class="pedidos-sidebar">
+        <div class="pedidos-header">
+            <h2>Meus Pedidos</h2>
+            <button id="close-pedidos" class="close-pedidos">&times;</button>
+        </div>
+        <!-- CORREÇÃO: Atualizando IDs para evitar conflitos -->
+        <form id="consulta-form-sidebar" class="consulta-form">
+            <label for="cpf-consulta-sidebar">CPF:</label>
+            <input type="text" id="cpf-consulta-sidebar" placeholder="Seu CPF"
+                style="width:100%;margin-bottom:1rem;">
+            <span class="input-error" id="erro-cpf-consulta-sidebar" role="alert"></span>
+            <button type="submit" style="width:100%;">Consultar</button>
+        </form>
+        <div id="pedidos-list-sidebar" class="pedidos-list"></div>
+    </div>
+
+    <script type="module" src="js/app.js"></script>
+    <footer style="background:#232323;border-top:1px solid #c9a94b;padding:0.7rem 0;">
+        <div style="max-width:900px;margin:0 auto;display:flex;align-items:center;">
+            <img src="imagens/logo-hatstore.png" alt="Hat Store" class="logo-header" />
+            <ul style="list-style:none;display:flex;gap:3.5rem;margin:0 0 0 2rem;padding:0;">
+                <li>
+                    <a href="documentacao.html"
+                        style="color:#c9a94b;text-decoration:underline;font-weight:500;font-size:1rem;">Documentação</a>
+                </li>
+                <li>
+                    <a href="https://cwi.com.br/" target="_blank"
+                        style="color:#c9a94b;text-decoration:underline;font-weight:500;font-size:1rem;">CWI</a>
+                </li>
+                <li>
+                    <a href="/swagger/index.html" target="_blank"
+                        style="color:#c9a94b;text-decoration:underline;font-weight:500;font-size:1rem;">Swagger API</a>
+                </li>
+            </ul>
+        </div>
+    </footer>
+</body>
+
+</html>

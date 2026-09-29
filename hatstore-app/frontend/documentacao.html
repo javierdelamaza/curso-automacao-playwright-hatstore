@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Documentação de Negócio - Hat Store</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header class="main-header">
+        <div class="header-content">
+            <img src="imagens/logo-hatstore.png" alt="Hat Store" class="logo-header" />
+            <div class="header-titles">
+                <h1 class="titulo-header">Hat Store</h1>
+                <span class="slogan-header">Seu estilo começa pela cabeça</span>
+            </div>
+        </div>
+    </header>
+    <main class="container-principal" style="max-width:900px;margin:2rem auto;background:#fff;padding:2rem;border-radius:12px;">
+        <h2 style="color:#c9a94b;text-align:center;">Documentação de Negócio</h2>
+        <section>
+            <h3>Visão Geral</h3>
+            <p>
+                A Hat Store é uma loja virtual especializada em chapéus, permitindo que clientes naveguem por produtos, filtrem por categoria e preço, adicionem itens ao carrinho, realizem compras e consultem seus pedidos. O sistema é composto por um frontend em HTML/CSS/JS e um backend em Go, com autenticação JWT e integração de métodos de pagamento fictícios (PIX e boleto).
+            </p>
+        </section>
+        <section>
+            <h3>Catálogo de Produtos</h3>
+            <p>O sistema possui <strong>15 chapéus</strong> divididos em 3 categorias:</p>
+            <ul>
+                <li><strong>Importados (9 produtos):</strong> Panamá, Fedora, Bucket, Cowboy, Floppy, Bowler, Beanie, Pork Pie, Trilby</li>
+                <li><strong>Nacionais (5 produtos):</strong> Snapback, Sertanejo, Gaúcho, Cangaceiro, Pescador</li>
+                <li><strong>Crescer (1 produto):</strong> Chapéu Gustavo Carvalho</li>
+            </ul>
+            <p>Faixa de preço: <strong>R$ 29,90</strong> (Pescador) até <strong>R$ 150,00</strong> (Fedora)</p>
+        </section>
+        <section>
+            <h3>Fluxo de Funcionamento</h3>
+            <ol>
+                <li><strong>Cadastro e Login:</strong> O usuário pode criar uma conta informando email e senha. O sistema possui proteção contra ataques de força bruta (bloqueio após 5 tentativas em 15 minutos). Tokens JWT expiram em 24 horas (ou 30 dias com "Lembrar-me").</li>
+                <li class="new-hatstore-only" style="display:none;"><strong>Validações de Registro (new_hatstore):</strong> Nome (mín. 3 caracteres), CPF (único, formato 000.000.000-00), data de nascimento (idade mínima 18 anos) e senha forte (8+ caracteres com maiúscula, minúscula, número e caractere especial) são obrigatórios.</li>
+                <li><strong>Listagem de Produtos:</strong> Todos os chapéus são exibidos na página inicial. O usuário pode filtrar por <strong>categoria</strong> (nacional, importado, crescer) e <strong>faixa de preço</strong> (mínimo/máximo).</li>
+                <li><strong>Controle de Estoque:</strong> Produtos sem estoque são exibidos como "Indisponível" e não podem ser adicionados ao carrinho. O estoque é descontado atomicamente ao finalizar pedidos.</li>
+                <li><strong>Carrinho de Compras:</strong> O cliente adiciona chapéus ao carrinho, ajusta quantidades e aplica cupons de desconto (ex: HATOFF para 25% off no primeiro pedido).</li>
+                <li><strong>Checkout:</strong> Para finalizar a compra, o usuário preenche dados pessoais, endereço e escolhe o método de pagamento (PIX ou boleto). O cupom HATOFF só pode ser usado uma vez por CPF.</li>
+                <li><strong>Registro do Pedido:</strong> O pedido é enviado ao backend, que valida estoque, calcula o total (aplicando descontos se aplicável) e armazena no banco de dados PostgreSQL.</li>
+                <li class="new-hatstore-only" style="display:none;"><strong>Cálculo de Frete (new_hatstore):</strong> O frete é calculado automaticamente com base no CEP do cliente. A 1ª unidade paga o custo base da região; unidades adicionais somam 30% (2ª), 20% (3ª) e 10% (4ª+ ) do custo base. Se o CEP não for atendido, o pedido é recusado.</li>
+                <li><strong>Consulta de Pedidos:</strong> O cliente pode consultar o histórico de pedidos informando o CPF na página dedicada ou na sidebar da home.</li>
+                <li class="new-hatstore-only" style="display:none;"><strong>Meus Pedidos (new_hatstore):</strong> Usuários logados podem consultar seus pedidos na página "Meus Pedidos", que exibe automaticamente todos os pedidos associados ao email autenticado, incluindo valor do frete.</li>
+                <li class="new-hatstore-only" style="display:none;"><strong>Perfil do Usuário (new_hatstore):</strong> O endpoint <code>/api/me</code> retorna nome, email, CPF e data de nascimento do usuário autenticado.</li>
+            </ol>
+        </section>
+        <section>
+            <h3>Regras de Negócio</h3>
+            <ul>
+                <li>O cupom <strong>HATOFF</strong> concede 20% de desconto apenas no primeiro pedido de cada CPF. Tentativas de reutilização retornam erro 409 (Conflict).</li>
+                <li>Pedidos só podem ser registrados por usuários autenticados (token JWT válido).</li>
+                <li>Dados obrigatórios: nome, CPF, email, telefone, endereço, número, bairro, CEP, cidade, UF, método de pagamento.</li>
+                <li>Validações de formato: CPF (000.000.000-00), telefone ((99) 99999-9999), CEP (00000-000).</li>
+                <li class="new-hatstore-only" style="display:none;">Com <strong>new_hatstore</strong>: o desconto HATOFF é aplicado apenas sobre os itens; o frete é somado depois ao total.</li>
+                <li>O estoque é verificado <strong>antes</strong> de descontar. Se não houver estoque suficiente, retorna erro 409 (Conflict).</li>
+                <li>Pedidos, usuários e estoque são armazenados no banco de dados PostgreSQL (Neon), com persistência total entre reinícios.</li>
+                <li>O estoque de cada chapéu pode ser editado via API (0 a 200 unidades).</li>
+            </ul>
+        </section>
+        <section class="new-hatstore-only" style="display:none;">
+            <h3>Frete — Tabela por Região</h3>
+            <table style="width:100%;border-collapse:collapse;margin:1rem 0;">
+                <thead>
+                    <tr style="background:#c9a94b;color:#fff;">
+                        <th style="padding:8px;text-align:left;">Região</th>
+                        <th style="padding:8px;text-align:left;">Faixa de CEP</th>
+                        <th style="padding:8px;text-align:right;">Custo base (1 un.)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td style="padding:6px;">Sudeste</td><td style="padding:6px;">01000-000 a 39999-999</td><td style="padding:6px;text-align:right;">R$ 12,50</td></tr>
+                    <tr style="background:#f9f9f9;"><td style="padding:6px;">Sul</td><td style="padding:6px;">80000-000 a 99999-999</td><td style="padding:6px;text-align:right;">R$ 15,00</td></tr>
+                    <tr><td style="padding:6px;">Centro-Oeste</td><td style="padding:6px;">70000-000 a 76999-999 / 77000-000 a 77999-999</td><td style="padding:6px;text-align:right;">R$ 20,00</td></tr>
+                    <tr style="background:#f9f9f9;"><td style="padding:6px;">Nordeste</td><td style="padding:6px;">40000-000 a 65999-999</td><td style="padding:6px;text-align:right;">R$ 22,00</td></tr>
+                    <tr><td style="padding:6px;">Norte</td><td style="padding:6px;">66000-000 a 69999-999</td><td style="padding:6px;text-align:right;">R$ 28,00</td></tr>
+                </tbody>
+            </table>
+            <p><strong>Progressivo por quantidade:</strong> 2ª unidade +30%, 3ª +20%, 4ª em diante +10% do custo base.</p>
+        </section>
+        <section>
+            <h3>Principais Funcionalidades</h3>
+            <ul>
+                <li>
+                    <strong>Autenticação de usuários:</strong> Cadastro e login com JWT. Proteção contra força bruta. Opção "Lembrar-me" para sessão de 30 dias.
+                </li>
+                <li class="new-hatstore-only" style="display:none;">
+                    <strong>Registro avançado (new_hatstore):</strong> Nome, CPF (único), data de nascimento (18+) e senha forte obrigatórios. Email validado por regex. CPF e email não podem ser duplicados.
+                </li>
+                <li>
+                    <strong>Filtro avançado de produtos:</strong> Filtre por categoria (múltipla seleção) e faixa de preço. Pesquisa por nome.
+                </li>
+                <li>
+                    <strong>Gerenciamento de carrinho:</strong> Adicione, remova e ajuste quantidades. Cupom HATOFF aplicável (25% off).
+                </li>
+                <li>
+                    <strong>Checkout seguro:</strong> Validação completa de dados. Métodos de pagamento: PIX (código copia-e-cola) ou Boleto.
+                </li>
+                <li class="new-hatstore-only" style="display:none;">
+                    <strong>Cálculo de frete (new_hatstore):</strong> Frete calculado automaticamente pelo CEP no checkout. Consulta disponível via <code>GET /api/frete?cep=...&quantidade=...</code>.
+                </li>
+                <li>
+                    <strong>Consulta de pedidos:</strong> Histórico completo por CPF com detalhes de itens, valores e status.
+                </li>
+                <li class="new-hatstore-only" style="display:none;">
+                    <strong>Meus Pedidos (new_hatstore):</strong> Página dedicada para usuários logados consultarem seus pedidos com valor de frete exibido.
+                </li>
+                <li class="new-hatstore-only" style="display:none;">
+                    <strong>Perfil do usuário (new_hatstore):</strong> Endpoint <code>/api/me</code> para consultar dados do perfil autenticado.
+                </li>
+                <li>
+                    <strong>Gestão de estoque:</strong> Visualização e edição do estoque via API dedicada.
+                </li>
+                <li>
+                    <strong>Auditoria:</strong> Registro automático das ações de login, registro de usuário e criação de pedidos. Logs incluem IP, email e detalhes da operação, com limpeza automática após 30 dias.
+                </li>
+                <li>
+                    <strong>Documentação Swagger:</strong> Disponível em <a href="/swagger/index.html" target="_blank">/swagger/index.html</a>.
+                </li>
+            </ul>
+        </section>
+        <section>
+            <h3>API - Rotas Disponíveis</h3>
+            <h4>Autenticação (públicas)</h4>
+            <ul>
+                <li><code>POST /auth/register</code> - Criação de conta de usuário</li>
+                <li><code>POST /auth/login</code> - Autenticação (retorna token JWT)</li>
+            </ul>
+            <h4>Produtos (públicas)</h4>
+            <ul>
+                <li><code>GET /api/hats</code> - Listagem de chapéus (suporta filtros: categoria, min, max)</li>
+                <li><code>GET /api/estoque</code> - Listagem do estoque atual</li>
+                <li><code>PATCH /api/hats/{id}/estoque</code> - Editar estoque de um chapéu</li>
+                <li class="new-hatstore-only" style="display:none;"><code>GET /api/frete?cep=...&quantidade=...</code> - Consulta de frete por CEP e quantidade</li>
+                <li><code>GET /api/feature-flags</code> - Feature flags ativas</li>
+            </ul>
+            <h4>Pedidos (protegidas - requer JWT)</h4>
+            <ul>
+                <li><code>POST /api/pedido</code> - Registrar novo pedido</li>
+                <li><code>GET /api/pedidos?cpf=...</code> - Consultar pedidos por CPF</li>
+                <li class="new-hatstore-only" style="display:none;"><code>GET /api/meus-pedidos</code> - Pedidos do usuário logado (JWT)</li>
+            </ul>
+            <h4 class="new-hatstore-only" style="display:none;">Perfil (protegida - requer JWT)</h4>
+            <ul class="new-hatstore-only" style="display:none;">
+                <li><code>GET /api/me</code> - Dados do perfil do usuário autenticado</li>
+            </ul>
+        </section>
+        <section>
+            <h3>Observações Técnicas</h3>
+            <ul>
+                <li>Frontend utiliza <code>localStorage</code> para carrinho, token JWT e email do usuário.</li>
+                <li>Backend em Go com gorilla/mux. Rotas protegidas por middleware JWT.</li>
+                <li>Banco de dados PostgreSQL (Neon) com GORM como ORM. Operações de estoque são atômicas via transações SQL.</li>
+                <li>Sistema de auditoria registra login, registro e pedidos no banco com IP, email e detalhes em JSON. Logs antigos (30+ dias) são removidos automaticamente.</li>
+                <li>Deploy automatizado via Fly.io. Testes executados antes do deploy.</li>
+                <li>Documentação Swagger gerada automaticamente via swaggo/swag.</li>
+                <li>Feature flags gerenciadas via tabela <code>settings</code> no banco, com cache em memória atualizado a cada 30 segundos.</li>
+            </ul>
+        </section>
+    </main>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var flags = window.FEATURE_FLAGS || {};
+            if (flags.new_hatstore) {
+                var els = document.querySelectorAll('.new-hatstore-only');
+                for (var i = 0; i < els.length; i++) {
+                    els[i].style.display = '';
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,62 +1,46 @@
 # Playwright Project — Hat Store
 
-Suíte de testes E2E em Playwright (JavaScript) para o site Hat Store,
-usada como exercício prático dos módulos do curso.
+Suíte de testes do curso: tela, E2E, visual, API e contrato.
 
 ## Pré-requisitos
 
-- Node.js LTS instalado.
-- Hat Store rodando (veja o README principal do repositório `hatstore`):
-  ```bash
-  cd d:\hatstore\hatstore
-  podman compose up --build
-  ```
-  Aplicação disponível em `http://localhost:8080`.
+- Node.js LTS
+- Hat Store rodando em http://localhost:8080 (`cd ..\hatstore-app; podman compose up --build -d`)
 
 ## Instalação
 
-```bash
+```powershell
 npm install
-npx playwright install
+npx playwright install chromium
 ```
 
 ## Execução
 
-```bash
-npm test              # roda toda a suíte, headless
-npm run test:headed   # com navegador visível
-npm run test:ui       # modo interativo (UI mode) — recomendado para aprender
-npm run test:home     # apenas os testes de busca/filtro da home
-npm run test:login    # apenas os testes de login/cadastro
-npm run test:api      # apenas os testes de API
-npm run report        # abre o relatório HTML da última execução
-```
-
-Para rodar contra outro ambiente (ex.: produção), defina `BASE_URL`:
-
-```bash
-BASE_URL=https://hatstore-prd.fly.dev npm test
-```
+| Comando | O que faz |
+|---|---|
+| `npm test` | Suíte completa no Chromium (sem os testes visuais) |
+| `npm run test:ui` | UI mode (recomendado para aprender e depurar) |
+| `npm run test:headed` | Vendo o navegador |
+| `npm run test:front` / `npm run test:api` | Só tela / só API |
+| `npm run test:e2e` | Só os fluxos completos (`@e2e`) |
+| `npm run test:visual:update` / `npm run test:visual` | Gerar / comparar baseline visual |
+| `npm run test:exercicios` / `npm run test:solucoes` | Exercícios / soluções |
+| `npm run codegen` | Gravar interações e gerar código |
+| `npm run report` | Abrir o relatório HTML |
 
 ## Estrutura
 
 ```
 playwright-project/
 ├── playwright.config.js
-├── package.json
-├── pages/              # Page Object Model
-│   ├── HomePage.js
-│   └── LoginPage.js
-└── tests/
-    ├── home.spec.js              # busca por produto
-    ├── search-and-filter.spec.js # exercícios de filtro (dever de casa, módulo 2)
-    ├── login.spec.js             # login e cadastro
-    └── api/
-        └── hats.spec.js          # teste de API/contrato básico
+├── api/            HatStoreApi (camada de API), schemas e validador de contrato
+├── data/           massa FIXA (catálogo, cupom, endereço)
+├── factories/      massa DINÂMICA (usuário com e-mail e CPF únicos)
+├── fixtures/       Page Objects, usuário cadastrado, token, página logada, API autenticada
+├── pages/          HomePage, LoginPage, CartPage, CheckoutPage, PedidosPage
+├── tests/
+│   ├── front/      busca, filtros combinados, login, cadastro, carrinho, E2E, visual
+│   ├── api/        hats, auth, frete, pedidos, contrato
+│   └── exercicios/ exercícios dos módulos 02 a 06 (test.fixme)
+└── solucoes/       soluções dos exercícios
 ```
-
-## Exercícios pendentes (ver módulo 2 e 3 do curso)
-
-Os testes marcados com `test.fixme(...)` em `search-and-filter.spec.js` são o
-"dever de casa": implemente-os seguindo o padrão de Page Object já usado em
-`home.spec.js` e `login.spec.js`.

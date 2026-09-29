@@ -1,0 +1,36 @@
+node_modules
+npm-debug.log*
+yarn-debug.log*
+dist/
+build/
+.env*
+
+# VS Code
+.vscode/
+
+# Jest coverage
+coverage/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Go
+bin/
+*.exe
+*.test
+*.out
+
+# Fly.io
+.fly/
+
+# Swagger
+docs/swagger/
+swagger.json
+swagger.yaml
+
+# Frontend/Backend build
+frontend/dist/
+frontend/build/
+backend/dist/
+backend/build/

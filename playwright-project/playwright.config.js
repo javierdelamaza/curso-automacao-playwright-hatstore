@@ -1,11 +1,7 @@
 // @ts-check
 import { defineConfig, devices } from '@playwright/test';
 
-/**
- * Aponta para o Hat Store rodando localmente via `podman compose up --build`.
- * Pode ser sobrescrito com a variável de ambiente BASE_URL, por exemplo para
- * apontar para o ambiente publicado (https://hatstore-prd.fly.dev).
- */
+// Hat Store local (hatstore-app/, via `podman compose up --build`).
 const baseURL = process.env.BASE_URL || 'http://localhost:8080';
 
 export default defineConfig({
@@ -14,7 +10,11 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 2 : undefined,
-  reporter: 'html',
+  reporter: [['html', { open: 'never' }], ['list']],
+
+  expect: {
+    toHaveScreenshot: { maxDiffPixelRatio: 0.01, animations: 'disabled' },
+  },
 
   use: {
     baseURL,
@@ -24,8 +24,26 @@ export default defineConfig({
   },
 
   projects: [
-    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
-    { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
-    { name: 'webkit', use: { ...devices['Desktop Safari'] } },
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
+      // Testes visuais dependem de baseline gerada na sua máquina: rodam só no projeto "visual".
+      grepInvert: /@visual/,
+    },
+    {
+      name: 'firefox',
+      use: { ...devices['Desktop Firefox'] },
+      grepInvert: /@visual/,
+    },
+    {
+      name: 'visual',
+      use: { ...devices['Desktop Chrome'] },
+      grep: /@visual/,
+    },
+    {
+      name: 'solucoes',
+      testDir: './solucoes',
+      use: { ...devices['Desktop Chrome'] },
+    },
   ],
 });

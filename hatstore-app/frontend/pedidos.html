@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meus Pedidos - Hat Store</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header class="main-header">
+        <div class="header-content">
+            <a href="index.html" style="display:flex;align-items:center;gap:1rem;text-decoration:none;">
+                <img src="imagens/logo-hatstore.png" alt="Hat Store" class="logo-header" />
+                <div class="header-titles">
+                    <h1 class="titulo-header">Hat Store</h1>
+                    <span class="slogan-header">Seu estilo começa pela cabeça</span>
+                </div>
+            </a>
+            <nav class="header-nav">
+                 <a href="index.html" class="header-link">Home</a>
+                 <a href="pedidos.html" class="header-link">Meus Pedidos</a>
+                 <div id="auth-links">
+                     <a href="auth.html" class="header-link">Login</a>
+                 </div>
+                 <button id="header-cart-btn" class="header-cart-btn" title="Abrir carrinho">
+                     <img src="imagens/carrinho-icon.png" alt="Carrinho" style="height:22px;vertical-align:middle;margin-right:6px;">
+                     <span style="font-weight:bold;">Carrinho</span>
+                 </button>
+            </nav>
+        </div>
+        <div class="header-bar">
+            <span class="header-bar-item">Frete grátis em todos os produtos do site</span>
+            <span class="header-bar-item">Compra segura</span>
+            <span class="header-bar-item">Suporte 24h</span>
+        </div>
+    </header>
+    <div class="promo-banner">
+        <span class="promo-text">
+            <strong>Promoção:</strong> Ganhe 20% OFF no primeiro pedido! Use o cupom <span class="cupom">HATOFF</span>
+        </span>
+    </div>
+
+    <main class="container-principal">
+        <!-- Layout antigo: busca por CPF -->
+        <section class="consulta-pedidos-container" id="pedidos-old">
+            <h2>Consultar Meus Pedidos</h2>
+            <p style="text-align: center; margin-bottom: 1.5rem; color: #444;">Digite o CPF associado à sua compra para visualizar o histórico de pedidos.</p>
+            
+            <form id="consulta-form-pedidos" class="consulta-form">
+                <label for="cpf-consulta-pedidos" class="sr-only">Informe seu CPF:</label>
+                <input type="text" id="cpf-consulta-pedidos" placeholder="Digite seu CPF" class="consulta-input">
+                <span class="input-error" id="erro-cpf-consulta-pedidos" role="alert"></span>
+                <button type="submit" class="consulta-button">Consultar</button>
+            </form>
+
+            <div id="pedidos-list" class="pedidos-list" aria-live="polite"></div>
+        </section>
+
+        <!-- Layout novo: pedidos automáticos baseados no login -->
+        <section class="pedidos-new-container" id="pedidos-new" style="display:none;">
+            <div class="pedidos-new-header">
+                <h2>🎩 Meus Pedidos</h2>
+                <p class="pedidos-new-subtitle">Histórico de compras da sua conta</p>
+            </div>
+
+            <div id="pedidos-new-loading" class="pedidos-new-loading" style="display:none;">
+                <div class="spinner"></div>
+                <span>Carregando seus pedidos...</span>
+            </div>
+
+            <div id="pedidos-new-empty" class="pedidos-new-empty" style="display:none;">
+                <span class="pedidos-new-empty-icon">🛒</span>
+                <h3>Nenhum pedido encontrado</h3>
+                <p>Você ainda não realizou nenhuma compra.</p>
+                <a href="index.html" class="pedidos-new-shop-btn">Explorar chapéus</a>
+            </div>
+
+            <div id="pedidos-new-list" class="pedidos-new-list" aria-live="polite"></div>
+        </section>
+    </main>
+
+    <!-- Loader animado -->
+    <div id="loader" class="loader" style="display:none;">
+        <div class="spinner"></div>
+        <span>Carregando...</span>
+    </div>
+
+    <!-- Modal genérico -->
+    <div id="modal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+            <h2 id="modal-title"></h2>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+    
+    <!-- Sidebars de Carrinho e Pedidos (opcional nesta página, mas mantido para consistência se desejar) -->
+    <!-- ...código das sidebars aqui, se necessário... -->
+
+    <!-- Scripts da aplicação -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+    <script type="module" src="js/app.js"></script> <!-- Para header, modal, loader, etc. -->
+    <script type="module" src="js/pedidos.js"></script> <!-- Lógica específica da página de pedidos -->
+    <footer style="background:#232323;border-top:1px solid #c9a94b;padding:0.7rem 0;">
+        <div style="max-width:900px;margin:0 auto;display:flex;align-items:center;">
+            <img src="imagens/logo-hatstore.png" alt="Hat Store" class="logo-header" />
+            <ul style="list-style:none;display:flex;gap:3.5rem;margin:0 0 0 2rem;padding:0;">
+                <li>
+                    <a href="documentacao.html" style="color:#c9a94b;text-decoration:underline;font-weight:500;font-size:1rem;">Documentação</a>
+                </li>
+                <li>
+                    <a href="https://cwi.com.br/" target="_blank" style="color:#c9a94b;text-decoration:underline;font-weight:500;font-size:1rem;">CWI</a>
+                </li>
+                <li>
+                    <a href="/swagger/index.html" target="_blank" style="color:#c9a94b;text-decoration:underline;font-weight:500;font-size:1rem;">Swagger API</a>
+                </li>
+            </ul>
+        </div>
+    </footer>
+</body>
+</html>

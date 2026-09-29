@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acessar Conta - Hat Store</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    
+    <header class="main-header">
+        <div class="header-content">
+            <a href="index.html" style="display:flex;align-items:center;gap:1rem;text-decoration:none;">
+                <img src="imagens/logo-hatstore.png" alt="Hat Store" class="logo-header" />
+                <div class="header-titles">
+                    <h1 class="titulo-header">Hat Store</h1>
+                    <span class="slogan-header">Seu estilo começa pela cabeça</span>
+                </div>
+            </a>
+            <nav class="header-nav">
+                 <a href="index.html" class="header-link">Home</a>
+                 <a href="pedidos.html" class="header-link">Meus Pedidos</a>
+                 <div id="auth-links">
+                     <a href="auth.html" class="header-link">Login</a>
+                 </div>
+                 <button id="header-cart-btn" class="header-cart-btn" title="Abrir carrinho">
+                     <img src="imagens/carrinho-icon.png" alt="Carrinho" style="height:22px;vertical-align:middle;margin-right:6px;">
+                     <span style="font-weight:bold;">Carrinho</span>
+                 </button>
+            </nav>
+        </div>
+        <div class="header-bar">
+            <span class="header-bar-item">Frete grátis em todos os produtos do site</span>
+            <span class="header-bar-item">Compra segura</span>
+            <span class="header-bar-item">Suporte 24h</span>
+        </div>
+    </header>
+
+    <main class="auth-container">
+        
+        <!-- Formulário de Login (Visível por padrão) -->
+        <form id="login-form">
+            <h2>Acessar sua Conta</h2>
+            
+            <!-- Região de feedback para leitores de tela -->
+            <div id="login-message" role="alert" aria-live="assertive" class="auth-message"></div>
+
+            <div class="auth-form-group">
+                <label for="login-email">Email</label>
+                <input type="email" id="login-email" name="email" autocomplete="email">
+                <span class="input-error" id="erro-login-email" role="alert"></span>
+            </div>
+            <div class="auth-form-group">
+                <label for="login-password">Senha</label>
+                <input type="password" id="login-password" name="password" autocomplete="current-password">
+                <span class="input-error" id="erro-login-password" role="alert"></span>
+            </div>
+            <div class="auth-checkbox-group">
+                <input type="checkbox" id="remember-me" name="rememberMe">
+                <label for="remember-me">Lembrar-me</label>
+            </div>
+            <button type="submit" class="auth-button" style="margin-top: 1rem;">Entrar</button>
+            <p class="auth-toggle-link">
+                Não tem uma conta? 
+                <button type="button" id="show-register-form">Crie uma agora</button>
+            </p>
+        </form>
+
+        <!-- Formulário de Registro (Escondido por padrão) -->
+        <form id="register-form" style="display:none;">
+            <h2>Criar nova Conta</h2>
+
+            <!-- Região de feedback para leitores de tela -->
+            <div id="register-message" role="alert" aria-live="assertive" class="auth-message"></div>
+
+            <div class="auth-form-group">
+                <label for="register-email">Email</label>
+                <input type="email" id="register-email" name="email" autocomplete="email">
+                <span class="input-error" id="erro-register-email" role="alert"></span>
+            </div>
+            <div class="auth-form-group" id="register-nome-group" style="display:none;">
+                <label for="register-nome">Nome completo</label>
+                <input type="text" id="register-nome" name="nome" minlength="3" autocomplete="name">
+                <span class="input-error" id="erro-register-nome" role="alert"></span>
+            </div>
+            <div class="auth-form-group" id="register-cpf-group" style="display:none;">
+                <label for="register-cpf">CPF</label>
+                <input type="text" id="register-cpf" name="cpf" placeholder="000.000.000-00" maxlength="14" autocomplete="off">
+                <span class="input-error" id="erro-register-cpf" role="alert"></span>
+            </div>
+            <div class="auth-form-group" id="register-dob-group" style="display:none;">
+                <label for="register-dob">Data de Nascimento</label>
+                <input type="date" id="register-dob" name="data_nascimento" autocomplete="bday">
+                <span class="input-error" id="erro-register-dob" role="alert"></span>
+            </div>
+            <div class="auth-form-group">
+                <label for="register-password">Senha</label>
+                <input type="password" id="register-password" name="password" autocomplete="new-password" aria-describedby="password-help">
+                <span class="input-error" id="erro-register-password" role="alert"></span>
+                <small id="password-help" style="color: var(--cor-prata); margin-top: 0.5rem; display: block;">
+                    A senha deve ter no mínimo 6 caracteres.
+                </small>
+            </div>
+            <button type="submit" class="auth-button" style="margin-top: 1rem;">Registrar</button>
+            <p class="auth-toggle-link">
+                Já tem uma conta? 
+                <button type="button" id="show-login-form">Faça o login</button>
+            </p>
+        </form>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+    <script type="module" src="js/auth.js"></script>
+    <footer style="background:#232323;border-top:1px solid #c9a94b;padding:0.7rem 0;">
+        <div style="max-width:900px;margin:0 auto;display:flex;align-items:center;">
+            <img src="imagens/logo-hatstore.png" alt="Hat Store" class="logo-header" />
+            <ul style="list-style:none;display:flex;gap:3.5rem;margin:0 0 0 2rem;padding:0;">
+                <li>
+                    <a href="documentacao.html" style="color:#c9a94b;text-decoration:underline;font-weight:500;font-size:1rem;">Documentação</a>
+                </li>
+                <li>
+                    <a href="https://cwi.com.br/" target="_blank" style="color:#c9a94b;text-decoration:underline;font-weight:500;font-size:1rem;">CWI</a>
+                </li>
+                <li>
+                    <a href="/swagger/index.html" target="_blank" style="color:#c9a94b;text-decoration:underline;font-weight:500;font-size:1rem;">Swagger API</a>
+                </li>
+            </ul>
+        </div>
+    </footer>
+</body>
+</html>

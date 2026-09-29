@@ -1,0 +1,39 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: hatstore
+      POSTGRES_PASSWORD: hatstore123
+      POSTGRES_DB: hatstore
+    volumes:
+      - hatstore-db-data:/var/lib/postgresql/data
+      - ./backend/migrations/001_init.sql:/docker-entrypoint-initdb.d/001_init.sql
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hatstore"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://hatstore:hatstore123@db:5432/hatstore?sslmode=disable
+      ENVIRONMENT: production
+      JWT_SECRET: supersecretlocalkey
+    command: ["/app/app"]
+    ports:
+      - "8080:8080"
+
+volumes:
+  hatstore-db-data:

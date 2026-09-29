@@ -4,3 +4,5 @@ playwright-report/
 blob-report/
 playwright/.cache/
 .env
+# Baselines visuais variam por SO/fonte: cada aluno gera a sua com `npm run test:visual:update`
+tests/**/*-snapshots/

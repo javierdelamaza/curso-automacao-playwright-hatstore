@@ -1,0 +1,54 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Node
+node_modules
+npm-debug.log
+yarn-error.log
+package-lock.json
+
+# Go
+*.mod.local
+go.sum
+
+# IDEs
+.vscode
+.idea
+.DS_Store
+*.swp
+*.swo
+*~
+
+# Build artifacts
+dist
+build
+bin
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Cache
+.cache
+.eslintcache
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Test coverage
+coverage
+.nyc_output
+
+# Logs
+logs
+*.log
+
+# Temporary files
+tmp
+temp
+*.tmp
+.tmp

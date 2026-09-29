@@ -1,113 +1,96 @@
-# Módulo 1 — Teoria de Automação de Testes
+# Módulo 01 — Teoria de Automação de Testes
 
-## 1. O que é automação de testes
+Antes de escrever código, precisamos saber **o que** vale a pena automatizar e **por quê**.
 
-Automação de testes é o uso de scripts/ferramentas para executar verificações
-que, de outra forma, seriam feitas manualmente por uma pessoa: clicar em
-botões, preencher formulários, conferir textos na tela, validar respostas de
-API, etc.
+## 1.1 O que é automação de testes
 
-O objetivo **não** é substituir o teste exploratório humano, e sim:
+É usar scripts para executar verificações que uma pessoa faria manualmente: clicar,
+preencher formulários, conferir textos na tela, validar respostas de API.
 
-- Repetir verificações de regressão de forma rápida e consistente.
-- Rodar em paralelo, em múltiplos ambientes/navegadores.
-- Integrar com CI/CD, barrando deploys quebrados.
-- Liberar tempo do time de QA para testes exploratórios e de maior valor.
+O objetivo **não** é substituir o teste humano. A automação serve para:
 
-## 2. Pirâmide de testes
+- repetir a regressão de forma rápida e sempre igual;
+- rodar em vários navegadores e em paralelo;
+- rodar no CI/CD e barrar uma entrega quebrada;
+- liberar o QA para o teste exploratório, que é onde se acham os bugs mais interessantes.
 
-```mermaid
-graph TD
-    A[E2E / UI] --> B[Integração / API]
-    B --> C[Unitários]
+## 1.2 Pirâmide de testes (na Hat Store)
+
+```
+        /\        E2E / UI: poucos, lentos, cobrem fluxos críticos
+       /  \
+      /----\      API / Integração: rápidos, cobrem regras e contratos
+     /      \
+    /--------\    Unitários: muitos, rapidíssimos (responsabilidade do time de dev)
 ```
 
-- **Unitários**: testam uma função/classe isolada. Rápidos, baratos, muitos.
-- **Integração / API**: testam a comunicação entre componentes (ex.: handler
-  Go + banco, endpoint `/api/hats`). Mais lentos que unitários, ainda rápidos.
-- **E2E / UI**: testam o fluxo completo pelo navegador, como um usuário real.
-  Mais lentos, mais frágeis, devem ser em menor quantidade — cobrindo os
-  fluxos críticos (login, compra, checkout), não cada variação de regra de
-  negócio.
+| Camada | Quem costuma fazer | Na Hat Store |
+|---|---|---|
+| Unitário | Dev (precisa do código-fonte) | Já existe no projeto (Go e Jest). **Não é foco do curso.** |
+| API | QA e Dev | `GET /api/hats`, `POST /auth/login`, `POST /api/pedido`... pelo **Swagger** |
+| E2E / UI | QA | Buscar, filtrar, cadastrar, logar, comprar com PIX/Boleto |
 
-No Hat Store isso se traduz em:
+> O QA consegue atuar nas camadas de **API e E2E sem ler o código-fonte**. Basta o
+> ambiente no ar, o Swagger e a tela. É o cenário deste curso.
 
-| Camada | Exemplo no projeto |
-|--------|--------------------|
-| Unitário | `backend/handlers/*_test.go`, `frontend/js/*.test.js` |
-| API | Chamadas a `/api/hats`, `/api/login`, `/api/pedidos` via Playwright (`request` context) |
-| E2E / UI | Buscar chapéu, filtrar por categoria/preço, login, checkout completo |
+## 1.3 Tipos de teste que a automação cobre
 
-## 3. Tipos de teste que a automação pode cobrir
+- **Funcional:** o sistema faz o que deveria. Ex.: o cupom `HATOFF` dá 20% de desconto no carrinho.
+- **Regressão:** o que funcionava continua funcionando depois de uma mudança.
+- **Contrato (API):** a resposta mantém o formato combinado (campos, tipos).
+- **Visual:** a tela não "quebrou" o layout (comparação de screenshots).
+- **Não funcionais** (fora do escopo, mas bom conhecer): performance, carga, segurança, acessibilidade.
 
-- **Funcional**: o sistema faz o que deveria (ex.: cupom `HATOFF` aplica 25% de desconto).
-- **Regressão**: features antigas continuam funcionando após mudanças novas.
-- **Contrato/API**: a resposta de um endpoint mantém o formato esperado (schema).
-- **Visual**: a tela não teve uma quebra de layout inesperada (screenshot diff).
-- **Não-funcional** (fora do escopo deste curso, mas bom saber que existem):
-  performance, carga, segurança, acessibilidade.
+## 1.4 Quando automatizar (e quando não)
 
-## 4. Quando automatizar (e quando não)
+Automatize quando o cenário é:
 
-Automatizar vale a pena quando o cenário é:
+- **repetitivo:** roda em toda regressão;
+- **estável:** a tela ou o fluxo não muda toda semana;
+- **de alto risco:** login, checkout, pagamento.
 
-- **Repetitivo** — vai rodar em toda regressão/release.
-- **Estável** — a tela/fluxo não muda toda semana.
-- **De alto risco de negócio** — login, checkout, pagamento.
+Deixe para depois, ou mantenha manual:
 
-Evite automatizar (ou automatize por último):
+- telas em redesenho constante;
+- casos raríssimos ou que exigem julgamento humano ("o botão parece desalinhado");
+- testes exploratórios: eles *descobrem* o que vale automatizar.
 
-- Telas ainda em constante mudança de design/fluxo.
-- Casos extremamente raros, exploratórios ou "que só um humano percebe"
-  (ex.: "o botão parece deslocado 2px").
-- Cenários que exigem julgamento visual/UX subjetivo.
+## 1.5 Flakiness (testes instáveis)
 
-## 5. Test flakiness (testes instáveis)
+Um teste é *flaky* quando passa e falha sem que nada mude. Causas comuns:
 
-Um teste é **flaky** quando passa e falha de forma inconsistente, sem
-mudança no código. Causas comuns:
+| Causa | Exemplo | Como evitar |
+|---|---|---|
+| Espera fixa | `waitForTimeout(3000)` | Esperar uma **condição** (`expect(...).toBeVisible()`) |
+| Dependência entre testes | Teste B usa usuário criado no teste A | Cada teste cria os próprios dados |
+| Seletor frágil | `div > div:nth-child(3)` | Locators por papel, texto, label ou `data-testid` |
+| Ambiente | Container ainda subindo | Subir o ambiente antes e conferir que está saudável |
 
-- Esperar tempo fixo (`sleep`) em vez de esperar uma condição real.
-- Depender de dados de outro teste (ordem de execução, banco compartilhado).
-- Seletores frágeis (texto/posição) que mudam com pequenas alterações de UI.
-- Ambiente instável (rede, containers subindo lentamente).
+O Playwright resolve boa parte disso com **auto-waiting** (módulo 02). O resto é disciplina
+de quem escreve o teste.
 
-O Playwright ataca a maior parte desse problema nativamente com
-**auto-waiting** e **web-first assertions** (módulo 2), mas a estratégia de
-dados e isolamento de teste continua sendo responsabilidade de quem escreve
-o teste.
+## 1.6 Massa de dados e isolamento
 
-## 6. Massa de dados e isolamento
+- **Cada teste roda sozinho**, em qualquer ordem.
+- **Massa fixa:** vem do banco inicial e não muda (catálogo de 15 chapéus, cupom `HATOFF`).
+- **Massa dinâmica:** é criada a cada teste (usuário novo com e-mail e CPF únicos).
+- Na Hat Store isso importa. Ela **não deixa** repetir e-mail nem CPF, bloqueia o login
+  depois de 5 tentativas erradas e o cupom só vale uma vez por CPF.
 
-Boas práticas:
+## 1.7 Métricas de uma suíte saudável
 
-- Cada teste deve poder rodar **sozinho**, sem depender de outro ter rodado antes.
-- Prefira gerar dados únicos por execução (ex.: e-mail com timestamp/UUID no
-  cadastro do Hat Store) em vez de reutilizar um usuário fixo que pode já
-  existir no banco.
-- Separe massa de dados fixa (chapéus do catálogo, cupom `HATOFF`) de massa
-  dinâmica (usuário novo a cada teste).
+- **Cobertura de fluxos críticos:** login, busca e compra têm teste?
+- **Tempo de execução:** dá para rodar a cada Pull Request?
+- **Taxa de flakiness:** quantas vezes é preciso "rodar de novo para passar"?
+- **Manutenção:** se um botão muda de lugar, quantos arquivos você precisa alterar? (O Page Object, no módulo 03, existe para diminuir esse número.)
 
-## 7. Métricas básicas de uma suíte de testes
+## Exercício (sem código)
 
-- **Cobertura de fluxo crítico**: os principais fluxos de negócio têm teste? (login, busca, checkout)
-- **Tempo de execução**: a suíte roda rápido o suficiente para rodar a cada PR?
-- **Taxa de flakiness**: quantos re-runs são necessários para a suíte passar?
-- **Manutenibilidade**: quando a UI muda, quantos arquivos precisam ser tocados?
-  (Page Object Model, módulo 2, existe para reduzir esse número.)
+Com a Hat Store aberta no navegador, escreva:
 
-## Exercício
-
-Antes de ir para o módulo 2, liste por escrito (sem código ainda):
-
-1. Quais 3 fluxos do Hat Store você automatizaria primeiro, e por quê?
-2. Um fluxo do Hat Store que você **não** automatizaria agora — justifique.
-3. Um exemplo de dado que precisa ser único a cada execução de teste (dica: cadastro de usuário).
-
-## Material de apoio
-
-- Slides originais da aula 1 (estratégia de automação): ver
-  [README do repositório de aulas](https://github.com/galaschi/start-aula-playwright).
-- Documentação oficial do Playwright: https://playwright.dev/docs/intro
+1. Os **3 fluxos** que você automatizaria primeiro e por quê.
+2. **1 fluxo** que você *não* automatizaria agora, com a justificativa.
+3. **2 dados** que precisam ser únicos a cada execução de teste.
+4. **Bônus:** algo que parece bug. (Dica: compare o que a documentação em `/documentacao.html` diz com o que a tela faz.)
 
 Próximo módulo: [02 — Fundamentos do Playwright](../02-fundamentos-playwright/README.md)

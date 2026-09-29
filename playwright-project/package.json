@@ -4,15 +4,23 @@
   "description": "Suite de testes E2E em Playwright para o Hat Store",
   "type": "module",
   "scripts": {
-    "test": "playwright test",
-    "test:headed": "playwright test --headed",
+    "test": "playwright test --project=chromium",
+    "test:all-browsers": "playwright test --project=chromium --project=firefox",
+    "test:headed": "playwright test --project=chromium --headed",
     "test:ui": "playwright test --ui",
-    "test:home": "playwright test tests/home.spec.js",
-    "test:login": "playwright test tests/login.spec.js",
-    "test:api": "playwright test tests/api",
+    "test:front": "playwright test tests/front --project=chromium",
+    "test:api": "playwright test tests/api --project=chromium",
+    "test:e2e": "playwright test --project=chromium --grep @e2e",
+    "test:exercicios": "playwright test tests/exercicios --project=chromium",
+    "test:solucoes": "playwright test --project=solucoes",
+    "test:visual": "playwright test --project=visual",
+    "test:visual:update": "playwright test --project=visual --update-snapshots",
+    "codegen": "playwright codegen http://localhost:8080",
     "report": "playwright show-report"
   },
   "devDependencies": {
-    "@playwright/test": "^1.47.0"
+    "@playwright/test": "^1.55.0",
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1"
   }
 }

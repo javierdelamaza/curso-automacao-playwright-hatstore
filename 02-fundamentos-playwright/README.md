@@ -1,176 +1,166 @@
-# Módulo 2 — Fundamentos do Playwright
+# Módulo 02 — Fundamentos do Playwright
 
-## 1. O que é o Playwright
+## 2.1 O que é o Playwright e como criar um projeto do zero
 
-Framework open-source (Microsoft) para automação de navegadores (Chromium,
-Firefox, WebKit) com uma única API, disponível em JS/TS, Python, Java e .NET.
-Neste curso usamos **JavaScript**, seguindo o repositório de aulas original.
+O Playwright é um framework open source da Microsoft para automatizar navegadores
+(Chromium, Firefox e WebKit) com uma única API. Tem versões em JavaScript/TypeScript, Python,
+Java e .NET. Neste curso usamos **JavaScript**.
 
-Diferenciais em relação a ferramentas mais antigas (ex.: Selenium clássico):
+O que ele tem de diferente:
 
-- **Auto-waiting**: antes de clicar/preencher, o Playwright espera o elemento
-  existir, estar visível, habilitado e estável — sem `sleep` manual.
-- **Web-first assertions**: `expect(locator).toBeVisible()` já espera e
-  tenta novamente até um timeout, em vez de falhar na primeira checagem.
-- **Isolamento de contexto**: cada teste roda em um `BrowserContext` isolado
-  (cookies/local storage próprios), sem precisar de um browser novo por teste.
-- **Trace viewer / vídeo / screenshot** automáticos em falhas, facilitando debug.
+- **Auto-waiting:** antes de clicar ou preencher, espera o elemento existir, ficar visível, habilitado e estável.
+- **Web-first assertions:** `expect(locator).toBeVisible()` tenta de novo até o timeout, sem `sleep`.
+- **Isolamento:** cada teste roda num contexto de navegador novo (cookies e localStorage limpos).
+- **Ferramentas de debug:** UI mode, trace viewer, vídeo e screenshot na falha, `codegen`.
 
-## 2. Instalando o projeto
+**Criando um projeto do zero** (para aprender; o projeto do curso já vem pronto):
 
-```bash
+```powershell
 mkdir meu-projeto-playwright
 cd meu-projeto-playwright
 npm init playwright@latest
 ```
 
-Respostas recomendadas no assistente (mesmo padrão da aula original):
+Respostas no assistente:
 
-- `TypeScript or JavaScript?` → **JavaScript**
-- `Where to put your end-to-end tests?` → **tests**
-- `Add a GitHub Actions workflow?` → **false** (adicionamos manualmente depois, se quisermos)
-- `Install Playwright browsers?` → **true**
+| Pergunta | Resposta |
+|---|---|
+| TypeScript or JavaScript? | **JavaScript** |
+| Where to put your end-to-end tests? | **tests** |
+| Add a GitHub Actions workflow? | **N** |
+| Install Playwright browsers? | **Y** |
 
-O projeto de exemplo deste curso já vem pronto em
-[`playwright-project/`](../playwright-project/README.md) — não precisa reinstalar,
-mas é importante saber recriar esse passo em um projeto do zero.
+## 2.2 Tour pelo projeto do curso
 
-## 3. Locators
-
-Locator é uma referência "preguiçosa" a um elemento: só é resolvido no
-navegador no momento da ação/asserção. Prioridade recomendada pela
-documentação oficial (do mais para o menos recomendado):
-
-1. `page.getByRole('button', { name: 'Entrar' })` — como um usuário/leitor de tela enxerga o elemento.
-2. `page.getByLabel('Email')`, `page.getByPlaceholder(...)`, `page.getByText(...)`.
-3. `page.getByTestId('...')` — quando existir `data-testid` no HTML.
-4. Seletor CSS/`id` (`page.locator('#search-hat')`) — usar quando não há papel/label semântico claro.
-
-No Hat Store, por exemplo:
-
-```js
-page.locator('#search-hat');                 // input de busca (sem label associada)
-page.getByRole('button', { name: 'Entrar' }); // botão de login
-page.locator('.hat-card');                   // cada card de produto
-page.locator('.add-to-cart-btn').first();    // botão "Adicionar ao carrinho"
+```
+playwright-project/
+├── playwright.config.js   configuração (baseURL, navegadores, trace, relatório)
+├── package.json           dependências e scripts (npm test, npm run test:ui...)
+├── pages/                 Page Objects (módulo 03)
+├── fixtures/              fixtures customizadas (módulos 03 e 04)
+├── data/                  massa de dados fixa (módulo 04)
+├── factories/             massa de dados dinâmica (módulo 04)
+├── api/                   cliente da API e contratos (módulo 05)
+├── tests/
+│   ├── front/             testes de tela
+│   ├── api/               testes de API
+│   └── exercicios/        exercícios (test.fixme)
+└── solucoes/              soluções dos exercícios
 ```
 
-Evite seletores frágeis como `div > div:nth-child(3) > span`, que quebram com
-qualquer mudança de layout.
+Pontos importantes do `playwright.config.js`:
 
-## 4. Ações e assertions básicas
+- `baseURL: 'http://localhost:8080'` → no teste basta escrever `page.goto('/')`.
+- `trace: 'on-first-retry'`, `screenshot: 'only-on-failure'`, `video: 'retain-on-failure'` → evidências quando falha.
+- `projects` → `chromium` (padrão), `firefox`, `visual` (módulo 04) e `solucoes`.
 
-```js
-await page.goto('/');
-await page.locator('#search-hat').fill('Panamá');
-await expect(page.locator('.hat-card')).toHaveCount(1);
-await expect(page.locator('.hat-card h3')).toContainText('Panamá');
+## 2.3 Descobrindo locators **sem o código-fonte**: DevTools
+
+Você não precisa do código da aplicação para saber como localizar um elemento. O navegador
+mostra tudo.
+
+1. Abra http://localhost:8080 no Chrome ou no Edge.
+2. Clique com o botão direito no campo de busca → **Inspecionar** (ou `F12`).
+3. Você vê o HTML real:
+   ```html
+   <input type="text" id="search-hat" placeholder="Buscar chapéu...">
+   ```
+4. Aba **Accessibility**, no painel do DevTools: mostra o **papel** (role) e o **nome acessível** do elemento.
+   É isso que o `getByRole` usa.
+
+**Ordem de preferência de locators** (recomendação oficial do Playwright):
+
+| Prioridade | Locator | Exemplo na Hat Store |
+|---|---|---|
+| 1 | `getByRole` | `page.getByRole('button', { name: 'Adicionar ao carrinho' })` |
+| 2 | `getByLabel` | `page.getByLabel('Cupom de desconto:')` |
+| 3 | `getByPlaceholder` / `getByText` | `page.getByPlaceholder('Buscar chapéu...')` |
+| 4 | `getByTestId` | `page.getByTestId('...')`, quando o dev adiciona `data-testid` |
+| 5 | CSS / id | `page.locator('#login-email')`, `page.locator('.hat-card')` |
+
+**Evite:** `div > div:nth-child(3) > span` e XPath longos. Quebram com qualquer mudança de layout.
+
+### Quando não existe um locator estável: peça um `data-testid` ao dev
+
+Os **cards de produto** da Hat Store não têm role, label nem id. Só a classe CSS `.hat-card`.
+Se o time de front mudar essa classe por causa de estilo, todos os testes quebram.
+
+Você descobre isso **só olhando o DevTools**, sem ler código. A ação de QA é abrir um pedido
+para o time de desenvolvimento:
+
+> **Título:** Adicionar `data-testid` nos cards de produto da home
+> **Onde:** Home → lista de chapéus (cada card)
+> **Pedido:** `data-testid="hat-card"` no card e `data-testid="hat-card-price"` no preço
+> **Motivo:** hoje o único seletor disponível é a classe CSS `.hat-card`, que pode mudar por estilo e quebrar a automação.
+
+Isso é **testabilidade**, e é trabalho do QA também.
+
+## 2.4 `codegen` e "Pick locator"
+
+O Playwright grava o que você faz e gera o código com locators **reais**:
+
+```powershell
+npm run codegen      # = npx playwright codegen http://localhost:8080
 ```
 
-Assertions mais usadas: `toBeVisible`, `toHaveText`, `toContainText`,
-`toHaveCount`, `toHaveURL`, `toHaveValue`, `toBeEnabled/Disabled`.
+- Abre um navegador e a janela do **Inspector**.
+- Clique e digite na loja → o código aparece no Inspector.
+- Botão **Pick locator**: passe o mouse sobre um elemento e veja o melhor locator.
 
-## 5. Page Object Model (POM)
+Na extensão do VS Code (aba Testing): **Record new** e **Pick locator** fazem o mesmo, direto no editor.
 
-Em vez de repetir seletores em cada teste, encapsulamos a página em uma
-classe. Isso evita duplicação e centraliza a manutenção: se um `id` mudar no
-front, você ajusta em **um lugar só**.
+> O `codegen` é um **ponto de partida**. Revise: ele não cria asserções boas e às vezes
+> escolhe um locator pior do que você escolheria.
 
-```js
-// pages/HomePage.js
-export class HomePage {
-  constructor(page) {
-    this.page = page;
-    this.searchInput = page.locator('#search-hat');
-    this.hatCards = page.locator('.hat-card');
-  }
+## 2.5 Primeiro teste: ações e asserções
 
-  async goto() {
-    await this.page.goto('/');
-  }
-
-  async search(term) {
-    await this.searchInput.fill(term);
-  }
-}
-```
-
-```js
-// tests/home.spec.js
-import { test, expect } from '@playwright/test';
-import { HomePage } from '../pages/HomePage.js';
-
-test('busca por produto existente retorna resultado', async ({ page }) => {
-  const home = new HomePage(page);
-  await home.goto();
-  await home.search('Panamá');
-  await expect(home.hatCards).toHaveCount(1);
-});
-```
-
-## 6. Fixtures
-
-Fixtures do Playwright injetam dependências prontas em cada teste (ex.: um
-`page` já logado, ou um Page Object já instanciado), evitando repetir setup
-em todo `test(...)`. Exemplo simplificado:
-
-```js
-// fixtures.js
-import { test as base } from '@playwright/test';
-import { HomePage } from './pages/HomePage.js';
-
-export const test = base.extend({
-  homePage: async ({ page }, use) => {
-    const home = new HomePage(page);
-    await home.goto();
-    await use(home);
-  },
-});
-```
-
-## 7. Configuração (`playwright.config.js`)
-
-Pontos essenciais:
-
-- `baseURL`: evita repetir a URL completa em cada `page.goto(...)`.
-- `use.trace`: `'on-first-retry'` grava trace apenas quando um teste falha e é re-executado — bom equilíbrio custo/benefício.
-- `projects`: permite rodar a mesma suíte em Chromium/Firefox/WebKit.
-- `webServer` (opcional): sobe a aplicação automaticamente antes dos testes.
-
-## 8. Rodando os testes
-
-```bash
-npx playwright test                # roda tudo, headless
-npx playwright test --headed       # com navegador visível
-npx playwright test --ui           # modo interativo (UI mode)
-npx playwright test home.spec.js   # arquivo específico
-npx playwright show-report         # abre relatório HTML da última execução
-```
-
-## 9. Testes de API com Playwright
-
-O Playwright também tem um cliente HTTP embutido (`request`), útil para
-testes de contrato/API sem precisar de navegador:
+Arquivo [tests/front/01-primeiro-teste.spec.js](../playwright-project/tests/front/01-primeiro-teste.spec.js):
 
 ```js
 import { test, expect } from '@playwright/test';
 
-test('GET /api/hats retorna lista de chapéus', async ({ request }) => {
-  const response = await request.get('/api/hats');
-  expect(response.ok()).toBeTruthy();
-  const hats = await response.json();
-  expect(Array.isArray(hats)).toBeTruthy();
+test('busca por "Panamá" retorna exatamente um chapéu', async ({ page }) => {
+  await page.goto('/');
+
+  await page.getByPlaceholder('Buscar chapéu...').fill('Panamá');
+
+  await expect(page.locator('.hat-card')).toHaveCount(1);
+  await expect(page.locator('.hat-card h3')).toHaveText('Chapéu Panamá');
 });
 ```
 
-## Exercício
+Estrutura de todo teste: **preparar → agir → verificar** (Arrange, Act, Assert).
 
-No projeto [`playwright-project/`](../playwright-project/README.md):
+| Ações mais usadas | Asserções mais usadas |
+|---|---|
+| `goto`, `click`, `fill`, `check`, `selectOption`, `press`, `pressSequentially` | `toBeVisible`, `toHaveText`, `toContainText`, `toHaveCount`, `toHaveURL`, `toHaveValue`, `toBeEnabled` |
 
-1. Rode a suíte de exemplo (`npx playwright test`) e confira o relatório.
-2. Implemente um teste novo de "dever de casa": filtrar produtos por
-   categoria `crescer` e validar que todos os cards exibidos pertencem a essa
-   categoria (dica: você pode validar visualmente ou combinar com o retorno de `/api/hats`).
-3. Implemente um teste de filtro por faixa de preço.
+## 2.6 Rodando e depurando
 
-Próximo módulo: [03 — Boas práticas de IA aplicada ao Playwright](../03-boas-praticas-ia-playwright/README.md)
+```powershell
+npm test                  # todos os testes, sem abrir navegador (headless)
+npm run test:headed       # vendo o navegador
+npm run test:ui           # UI mode: linha do tempo, DOM de cada passo (recomendado para aprender)
+npx playwright test tests/front/busca.spec.js      # um arquivo
+npx playwright test -g "Panamá"                    # testes cujo nome contém "Panamá"
+npm run report            # relatório HTML da última execução
+```
+
+**Quando um teste falha:**
+
+1. Leia a mensagem: *Expected* x *Received* e a linha marcada com `>`.
+2. Abra o relatório → screenshot, vídeo e **trace** (linha do tempo com o DOM de cada passo).
+3. Rode com `--debug` para executar passo a passo.
+
+## Exercício (dever de casa)
+
+Em [tests/exercicios/exercicios.spec.js](../playwright-project/tests/exercicios/exercicios.spec.js), bloco **"Bloco 2 - filtros da home"**:
+
+1. Remova o `.fixme` do teste de categoria **Crescer** e implemente.
+2. Remova o `.fixme` do teste de **faixa de preço 100 a 130** e implemente.
+3. Rode com `npm run test:exercicios`.
+
+Descubra os locators pelo DevTools ou pelo `codegen`. A solução está em
+`solucoes/exercicios.spec.js`; só olhe depois de tentar.
+
+Próximo módulo: [03 — Padrões e boas práticas](../03-padroes-boas-praticas/README.md)

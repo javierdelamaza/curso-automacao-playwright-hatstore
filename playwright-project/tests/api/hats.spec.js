@@ -1,25 +1,43 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../../fixtures/index.js';
+import { CATEGORIAS, TOTAL_PRODUTOS_CATALOGO } from '../../data/catalogo.js';
 
-// Testes de API/contrato básico (módulo 2), sem precisar de navegador.
-test.describe('API — /api/hats', () => {
-  test('GET /api/hats retorna 200 e uma lista de chapéus', async ({ request }) => {
-    const response = await request.get('/api/hats');
+test.describe('API - GET /api/hats', () => {
+  test('lista o catálogo completo', async ({ api }) => {
+    const response = await api.listarChapeus();
 
-    expect(response.ok()).toBeTruthy();
-
-    const hats = await response.json();
-    expect(Array.isArray(hats)).toBeTruthy();
-    expect(hats.length).toBeGreaterThan(0);
+    expect(response.status()).toBe(200);
+    const chapeus = await response.json();
+    expect(chapeus).toHaveLength(TOTAL_PRODUTOS_CATALOGO);
   });
 
-  test('cada chapéu retornado tem os campos de contrato esperados', async ({ request }) => {
-    const response = await request.get('/api/hats');
-    const hats = await response.json();
+  test('filtra por categoria', async ({ api }) => {
+    const response = await api.listarChapeus({ categoria: CATEGORIAS.crescer });
 
-    const primeiro = hats[0];
-    expect(primeiro).toHaveProperty('id');
-    expect(primeiro).toHaveProperty('nome');
-    expect(primeiro).toHaveProperty('price');
-    expect(primeiro).toHaveProperty('categoria');
+    const chapeus = await response.json();
+    expect(chapeus.length).toBeGreaterThan(0);
+    for (const chapeu of chapeus) {
+      expect(chapeu.categoria).toBe(CATEGORIAS.crescer);
+    }
+  });
+
+  test('filtra por faixa de preço', async ({ api }) => {
+    const response = await api.listarChapeus({ min: 100, max: 130 });
+
+    const chapeus = await response.json();
+    expect(chapeus.length).toBeGreaterThan(0);
+    for (const chapeu of chapeus) {
+      expect(chapeu.price).toBeGreaterThanOrEqual(100);
+      expect(chapeu.price).toBeLessThanOrEqual(130);
+    }
+  });
+
+  test('produto sem estoque vem com temEstoque = false', async ({ api }) => {
+    const chapeus = await (await api.listarChapeus()).json();
+
+    const semEstoque = chapeus.filter((c) => c.quantidade === 0);
+    expect(semEstoque.length).toBeGreaterThan(0);
+    for (const chapeu of semEstoque) {
+      expect(chapeu.temEstoque).toBe(false);
+    }
   });
 });
