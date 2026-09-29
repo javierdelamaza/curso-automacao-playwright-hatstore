@@ -193,5 +193,6 @@ para o chat o HTML ou o erro e traz a resposta para o VS Code. O módulo 06 ensi
 | Todos os testes falham com `ECONNREFUSED` | Hat Store não está no ar | Suba com `podman compose up -d` na pasta `hatstore-app` |
 | `npx` bloqueado no PowerShell | Execution policy | `Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned` |
 | Testes falham por estoque/dados estranhos | Banco "sujo" de muitas execuções | `podman compose down -v` e `podman compose up --build -d` |
+| Firefox: `Host system is missing dependencies` / `Failed to launch` | Antivírus ou política corporativa bloqueando o Firefox do Playwright | O curso usa só o Chromium (`npm test`). O Firefox é opcional; ignore ou peça liberação ao suporte |
 
 Próximo módulo: [01 — Teoria de Automação de Testes](../01-teoria-automacao-testes/README.md)
